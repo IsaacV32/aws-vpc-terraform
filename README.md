@@ -18,9 +18,7 @@ Current architecture includes:
 - Public route table with internet routing
 - Private route table for internal-only networking (no internet egress yet)
 - Consistent resource tagging via Terraform locals
-
-> Private subnets currently have no outbound internet access.  
-> NAT egress will be introduced in a later stage.
+- NAT Gateways (one per AZ) for private subnet internet egress
 
 ---
 
@@ -46,8 +44,7 @@ Current architecture includes:
 - **Stage 1:** Single-subnet VPC refactored to use variables and consistent tagging
 - **Stage 2:** Expanded to multi-AZ public subnets for high availability
 - **Stage 3:** Added multi-AZ private subnets with isolated routing
-
-Future stages will introduce NAT gateways, private subnet egress, and additional production patterns.
+- **Stage 4:** Implemented NAT gateways to enable secure outbound internet access from private subnets
 
 ---
 
