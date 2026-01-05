@@ -32,3 +32,8 @@ This project provisions a foundational AWS VPC using Terraform, including networ
 - Parameterise CIDRs and availability zones
 - Add NAT Gateway and private subnets
 - Move state to S3 backend
+
+## Challenges and Lessons Learned
+- Refactoring from a single-subnet design to a multi-AZ layout required careful state management to avoid CIDR conflicts.
+- Encountered subnet CIDR overlap errors when replacing existing resources, reinforcing the importance of understanding Terraform state vs actual AWS resources.
+- Learned when it is appropriate to perform a full infrastructure teardown (`terraform destroy`) during early-stage refactors to ensure state consistency.
