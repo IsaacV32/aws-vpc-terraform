@@ -19,7 +19,7 @@ Current architecture includes:
 - Private route table for internal-only networking (no internet egress yet)
 - Consistent resource tagging via Terraform locals
 - NAT Gateways (one per AZ) for private subnet internet egress
-
+- VPC Flow Logs → CloudWatch Logs (7-day retention) for network visibility
 ---
 
 ## Technologies Used
@@ -45,7 +45,7 @@ Current architecture includes:
 - **Stage 2:** Expanded to multi-AZ public subnets for high availability
 - **Stage 3:** Added multi-AZ private subnets with isolated routing
 - **Stage 4:** Implemented NAT gateways to enable secure outbound internet access from private subnets
-
+- **Stage 5:** Enabled VPC Flow Logs to CloudWatch Logs for traffic visibility and troubleshooting
 ---
 
 ## Challenges and Lessons Learned
@@ -56,5 +56,6 @@ Current architecture includes:
 - Encountered duplicate resource definition errors when refactoring NAT Gateway resources, reinforcing the importance of maintaining unique resource names within Terraform modules.
 - Gained hands-on experience resolving Terraform state and configuration drift during iterative infrastructure refactors.
 - Improved understanding of how Terraform builds a dependency graph independent of resource declaration order in code.
+- Updated deprecated Terraform Flow Logs arguments (migrated from log_group_name to log_destination) to maintain forward compatibility with newer AWS provider versions.
 
 ---
