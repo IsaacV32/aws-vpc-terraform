@@ -67,6 +67,32 @@ resource "aws_internet_gateway" "igw" {
   })
 
 }
+
+# ----------------------------
+# NAT Gateways (one per AZ)
+# ----------------------------
+resource "aws_eip" "nat" {
+  count  = length(var.azs)
+  domain = "vpc"
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-nat-eip-${var.azs[count.index]}"
+  })
+}
+
+resource "aws_nat_gateway" "nat" {
+  count = length(var.azs)
+
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-nat-${var.azs[count.index]}"
+  })
+
+  depends_on = [aws_internet_gateway.igw]
+}
+
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main.id
 
@@ -80,11 +106,12 @@ resource "aws_route_table" "public_rt" {
   })
 
 }
-resource "aws_route_table" "private_rt" {
+resource "aws_route_table" "private" {
+  count  = length(var.azs)
   vpc_id = aws_vpc.main.id
 
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-${var.environment}-private-rt"
+    Name = "${var.project_name}-${var.environment}-private-rt-${var.azs[count.index]}"
   })
 }
 
@@ -96,8 +123,9 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table_association" "private" {
-  count = length(aws_subnet.private)
+  count = length(var.azs)
 
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private_rt.id
+  route_table_id = aws_route_table.private[count.index].id
 }
+
