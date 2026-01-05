@@ -53,11 +53,8 @@ Current architecture includes:
 - Encountered subnet CIDR overlap errors when replacing existing resources, reinforcing the importance of understanding Terraform state versus actual AWS resources.
 - Learned when it is appropriate to fully destroy and recreate infrastructure during early-stage refactors to maintain state consistency.
 - Gained confidence interpreting Terraform plans and validating infrastructure changes before applying them.
+- Encountered duplicate resource definition errors when refactoring NAT Gateway resources, reinforcing the importance of maintaining unique resource names within Terraform modules.
+- Gained hands-on experience resolving Terraform state and configuration drift during iterative infrastructure refactors.
+- Improved understanding of how Terraform builds a dependency graph independent of resource declaration order in code.
 
 ---
-
-## Next Improvements
-- Add NAT Gateways for private subnet internet egress
-- Introduce VPC endpoints (e.g. S3 gateway endpoint)
-- Remote Terraform state using S3 and DynamoDB locking
-- Modularise networking components
