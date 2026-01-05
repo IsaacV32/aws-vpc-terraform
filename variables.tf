@@ -26,3 +26,15 @@ variable "extra_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "azs" {
+  description = "Availability Zones to use"
+  type        = list(string)
+  default     = ["ap-southeast-2a", "ap-southeast-2b"]
+}
+
+variable "public_subnet_cidrs" {
+  description = "Public subnet CIDRs (must match azs length)"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}

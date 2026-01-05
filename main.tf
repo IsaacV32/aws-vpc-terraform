@@ -32,18 +32,20 @@ resource "aws_vpc" "main" {
   })
 }
 
-resource "aws_subnet" "public_a" {
+resource "aws_subnet" "public" {
+  count = length(var.azs)
+
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "ap-southeast-2a"
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = var.azs[count.index]
   map_public_ip_on_launch = true
 
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-${var.environment}-public-a"
+    Name = "${var.project_name}-${var.environment}-public-${var.azs[count.index]}"
     Tier = "public"
   })
-
 }
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
@@ -65,7 +67,10 @@ resource "aws_route_table" "public_rt" {
   })
 
 }
-resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = aws_subnet.public_a.id
+resource "aws_route_table_association" "public" {
+  count = length(aws_subnet.public)
+
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public_rt.id
 }
+
