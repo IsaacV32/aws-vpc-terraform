@@ -129,3 +129,73 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[count.index].id
 }
 
+resource "aws_route" "private_egress" {
+  count = length(var.azs)
+
+  route_table_id         = aws_route_table.private[count.index].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat[count.index].id
+}
+
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/aws/vpc/flow-logs/${var.project_name}-${var.environment}"
+  retention_in_days = 7
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-vpc-flow-logs"
+  })
+}
+
+resource "aws_iam_role" "vpc_flow_logs" {
+  name = "${var.project_name}-${var.environment}-vpc-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-vpc-flow-logs-role"
+  })
+}
+
+resource "aws_iam_role_policy" "vpc_flow_logs" {
+  name = "${var.project_name}-${var.environment}-vpc-flow-logs-policy"
+  role = aws_iam_role.vpc_flow_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_flow_log" "vpc" {
+  vpc_id               = aws_vpc.main.id
+  traffic_type         = "ALL"
+  log_destination_type = "cloud-watch-logs"
+  log_destination      = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  iam_role_arn         = aws_iam_role.vpc_flow_logs.arn
+
+  tags = merge(local.common_tags, {
+    Name = "${var.project_name}-${var.environment}-vpc-flow-log"
+  })
+}
