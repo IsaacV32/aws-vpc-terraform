@@ -47,17 +47,19 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_subnet" "private" {
-  count = length(var.azs)
+  count = length(var.private_subnet_cidrs)
 
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidrs[count.index]
-  availability_zone = var.azs[count.index]
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.private_subnet_cidrs[count.index]
+  availability_zone       = var.azs[count.index]
+  map_public_ip_on_launch = false
 
   tags = merge(local.common_tags, {
     Name = "${var.project_name}-${var.environment}-private-${var.azs[count.index]}"
     Tier = "private"
   })
 }
+
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
@@ -123,11 +125,11 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table_association" "private" {
-  count = length(var.azs)
-
+  count          = length(var.azs)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }
+
 
 resource "aws_route" "private_egress" {
   count = length(var.azs)
