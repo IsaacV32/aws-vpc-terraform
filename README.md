@@ -58,4 +58,13 @@ Current architecture includes:
 - Improved understanding of how Terraform builds a dependency graph independent of resource declaration order in code.
 - Updated deprecated Terraform Flow Logs arguments (migrated from log_group_name to log_destination) to maintain forward compatibility with newer AWS provider versions.
 
----
+## CI/CD + Remote State
+
+This repository uses GitHub Actions to run Terraform with **OIDC-based authentication** (no long-lived AWS access keys stored in GitHub).
+
+- **Plan** runs on Pull Requests
+- **Apply** runs manually (workflow_dispatch) to avoid accidental deployments
+- Terraform state is stored remotely in **S3** with **DynamoDB state locking**
+
+### Why remote state?
+Using S3 + DynamoDB prevents state drift between local runs and CI, and locking prevents concurrent applies from corrupting state.
